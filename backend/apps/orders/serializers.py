@@ -12,8 +12,19 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderItem
-        fields = ["id", "dish", "dish_detail", "quantity", "unit_price"]
-        read_only_fields = ["unit_price"]
+        fields = [
+            "id",
+            "dish",
+            "dish_detail",
+            "quantity",
+            "unit_price",
+            "calories",
+            "protein",
+            "fat",
+            "carbohydrate",
+            "sodium",
+        ]
+        read_only_fields = ["unit_price", "calories", "protein", "fat", "carbohydrate", "sodium"]
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -58,7 +69,17 @@ class OrderSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(f"{dish.name} 库存不足。")
             dish.stock -= quantity
             dish.save(update_fields=["stock"])
-            OrderItem.objects.create(order=order, dish=dish, quantity=quantity, unit_price=dish.price)
+            OrderItem.objects.create(
+                order=order,
+                dish=dish,
+                quantity=quantity,
+                unit_price=dish.price,
+                calories=dish.calories * quantity,
+                protein=float(dish.protein) * quantity,
+                fat=float(dish.fat) * quantity,
+                carbohydrate=float(dish.carbohydrate) * quantity,
+                sodium=dish.sodium * quantity,
+            )
         order.recalculate_total()
         from apps.delivery.models import DeliveryTask
 

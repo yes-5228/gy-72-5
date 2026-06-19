@@ -19,8 +19,15 @@ export function createOrder(payload) {
   return api.post('/orders/', payload)
 }
 
-export function analyzeNutrition(dishIds) {
-  return api.post('/nutrition/analyze/', { dish_ids: dishIds })
+export function analyzeNutrition(items) {
+  if (items.length > 0 && typeof items[0] === 'object') {
+    const payload = items.map((item) => ({
+      dish_id: item.dish_id ?? item.dish?.id ?? item.id,
+      quantity: item.quantity ?? 1,
+    }))
+    return api.post('/nutrition/analyze/', { items: payload })
+  }
+  return api.post('/nutrition/analyze/', { dish_ids: items })
 }
 
 export function fetchDeliveries() {

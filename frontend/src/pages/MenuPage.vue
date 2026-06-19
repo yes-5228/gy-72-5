@@ -34,7 +34,7 @@
         @increase="addToCart"
         @decrease="decreaseCart"
       />
-      <NutritionPanel :dish-ids="cartDishIds" />
+      <NutritionPanel :items="cart" />
     </aside>
   </div>
 </template>
@@ -68,8 +68,6 @@ const mealOptions = [
   { value: 'lunch', label: '午餐' },
   { value: 'dinner', label: '晚餐' },
 ]
-
-const cartDishIds = computed(() => cart.value.map((item) => item.dish.id))
 
 async function loadData() {
   loading.value = true

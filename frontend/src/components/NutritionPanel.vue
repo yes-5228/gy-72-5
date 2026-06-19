@@ -2,7 +2,7 @@
   <section class="panel">
     <div class="panel-title">
       <h2>营养成分分析</h2>
-      <button class="ghost-button small" type="button" :disabled="dishIds.length === 0" @click="runAnalysis">
+      <button class="ghost-button small" type="button" :disabled="items.length === 0" @click="runAnalysis">
         重新分析
       </button>
     </div>
@@ -27,7 +27,7 @@ import { computed, ref, watch } from 'vue'
 import { analyzeNutrition } from '../api/canteen'
 
 const props = defineProps({
-  dishIds: {
+  items: {
     type: Array,
     required: true,
   },
@@ -48,12 +48,16 @@ const macroItems = computed(() => {
 })
 
 async function runAnalysis() {
-  if (props.dishIds.length === 0) {
+  if (props.items.length === 0) {
     analysis.value = null
     return
   }
-  analysis.value = await analyzeNutrition(props.dishIds)
+  analysis.value = await analyzeNutrition(props.items)
 }
 
-watch(() => props.dishIds.join(','), runAnalysis, { immediate: true })
+watch(
+  () => props.items.map((item) => `${item.dish?.id ?? item.dish_id}:${item.quantity}`).join(','),
+  runAnalysis,
+  { immediate: true },
+)
 </script>

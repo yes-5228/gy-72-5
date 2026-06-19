@@ -43,6 +43,11 @@ class OrderItem(models.Model):
     dish = models.ForeignKey(Dish, related_name="order_items", on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField("数量", default=1)
     unit_price = models.DecimalField("单价", max_digits=8, decimal_places=2)
+    calories = models.PositiveIntegerField("热量快照(kcal)", default=0)
+    protein = models.DecimalField("蛋白质快照(g)", max_digits=6, decimal_places=1, default=0)
+    fat = models.DecimalField("脂肪快照(g)", max_digits=6, decimal_places=1, default=0)
+    carbohydrate = models.DecimalField("碳水快照(g)", max_digits=6, decimal_places=1, default=0)
+    sodium = models.PositiveIntegerField("钠快照(mg)", default=0)
 
     class Meta:
         verbose_name = "订单明细"

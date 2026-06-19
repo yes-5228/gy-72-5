@@ -6,11 +6,27 @@ from apps.menu.models import Dish
 from apps.menu.serializers import DishSerializer
 
 
+class DishWithQuantitySerializer(serializers.Serializer):
+    dish_id = serializers.IntegerField(min_value=1)
+    quantity = serializers.IntegerField(min_value=1, default=1)
+
+
 class NutritionAnalysisRequestSerializer(serializers.Serializer):
     dish_ids = serializers.ListField(
         child=serializers.IntegerField(min_value=1),
-        allow_empty=False,
+        allow_empty=True,
+        required=False,
     )
+    items = serializers.ListField(
+        child=DishWithQuantitySerializer(),
+        allow_empty=True,
+        required=False,
+    )
+
+    def validate(self, attrs):
+        if not attrs.get("dish_ids") and not attrs.get("items"):
+            raise serializers.ValidationError("请提供 dish_ids 或 items 参数。")
+        return attrs
 
 
 class NutritionAnalysisSerializer(serializers.Serializer):
@@ -19,15 +35,36 @@ class NutritionAnalysisSerializer(serializers.Serializer):
     advice = serializers.ListField(child=serializers.CharField())
 
 
-def analyze_dishes(dish_ids):
-    dishes = list(Dish.objects.filter(id__in=dish_ids).select_related("category"))
+def analyze_dishes(dish_ids=None, items=None):
+    quantity_map = {}
+    if items:
+        for item in items:
+            quantity_map[item["dish_id"]] = quantity_map.get(item["dish_id"], 0) + item.get("quantity", 1)
+    elif dish_ids:
+        for did in dish_ids:
+            quantity_map[did] = quantity_map.get(did, 0) + 1
+
+    dish_ids_list = list(quantity_map.keys())
+    dishes = list(Dish.objects.filter(id__in=dish_ids_list).select_related("category"))
+    dish_by_id = {d.id: d for d in dishes}
+
     totals = {
-        "calories": sum(dish.calories for dish in dishes),
-        "protein": sum(Decimal(dish.protein) for dish in dishes),
-        "fat": sum(Decimal(dish.fat) for dish in dishes),
-        "carbohydrate": sum(Decimal(dish.carbohydrate) for dish in dishes),
-        "sodium": sum(dish.sodium for dish in dishes),
+        "calories": 0,
+        "protein": Decimal("0"),
+        "fat": Decimal("0"),
+        "carbohydrate": Decimal("0"),
+        "sodium": 0,
     }
+    for dish_id, qty in quantity_map.items():
+        dish = dish_by_id.get(dish_id)
+        if not dish:
+            continue
+        totals["calories"] += dish.calories * qty
+        totals["protein"] += Decimal(dish.protein) * qty
+        totals["fat"] += Decimal(dish.fat) * qty
+        totals["carbohydrate"] += Decimal(dish.carbohydrate) * qty
+        totals["sodium"] += dish.sodium * qty
+
     totals = {key: float(value) if isinstance(value, Decimal) else value for key, value in totals.items()}
 
     advice = []
