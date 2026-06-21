@@ -2,12 +2,13 @@
   <section class="panel">
     <div class="panel-title">
       <h2>营养成分分析</h2>
-      <button class="ghost-button small" type="button" :disabled="items.length === 0" @click="runAnalysis">
-        重新分析
+      <button class="ghost-button small" type="button" :disabled="items.length === 0 || loading" @click="runAnalysis">
+        {{ loading ? '分析中...' : '重新分析' }}
       </button>
     </div>
 
-    <div v-if="!analysis" class="empty-state">餐盘中有菜品后可查看总热量、蛋白质、脂肪、碳水和钠含量。</div>
+    <div v-if="loading" class="loading">营养数据计算中...</div>
+    <div v-else-if="!analysis" class="empty-state">餐盘中有菜品后可查看总热量、蛋白质、脂肪、碳水和钠含量。</div>
     <template v-else>
       <div class="macro-grid">
         <div v-for="item in macroItems" :key="item.label">
@@ -34,6 +35,8 @@ const props = defineProps({
 })
 
 const analysis = ref(null)
+const loading = ref(false)
+let pendingRequest = 0
 
 const macroItems = computed(() => {
   if (!analysis.value) return []
@@ -52,7 +55,18 @@ async function runAnalysis() {
     analysis.value = null
     return
   }
-  analysis.value = await analyzeNutrition(props.items)
+  const requestId = ++pendingRequest
+  loading.value = true
+  try {
+    const result = await analyzeNutrition(props.items)
+    if (requestId === pendingRequest) {
+      analysis.value = result
+    }
+  } finally {
+    if (requestId === pendingRequest) {
+      loading.value = false
+    }
+  }
 }
 
 watch(
