@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import transaction
 from rest_framework import serializers
 
@@ -75,9 +77,9 @@ class OrderSerializer(serializers.ModelSerializer):
                 quantity=quantity,
                 unit_price=dish.price,
                 calories=dish.calories * quantity,
-                protein=float(dish.protein) * quantity,
-                fat=float(dish.fat) * quantity,
-                carbohydrate=float(dish.carbohydrate) * quantity,
+                protein=Decimal(dish.protein) * quantity,
+                fat=Decimal(dish.fat) * quantity,
+                carbohydrate=Decimal(dish.carbohydrate) * quantity,
                 sodium=dish.sodium * quantity,
             )
         order.recalculate_total()

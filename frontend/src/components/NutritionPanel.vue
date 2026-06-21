@@ -7,16 +7,20 @@
       </button>
     </div>
 
-    <div v-if="loading" class="loading">营养数据计算中...</div>
-    <div v-else-if="!analysis" class="empty-state">餐盘中有菜品后可查看总热量、蛋白质、脂肪、碳水和钠含量。</div>
+    <div v-if="!analysis && !loading" class="empty-state">餐盘中有菜品后可查看总热量、蛋白质、脂肪、碳水和钠含量。</div>
     <template v-else>
-      <div class="macro-grid">
-        <div v-for="item in macroItems" :key="item.label">
-          <span>{{ item.label }}</span>
-          <strong>{{ item.value }}</strong>
+      <div class="macro-grid-wrapper">
+        <div v-if="loading" class="recalculating-overlay">
+          <span>正在重新计算...</span>
+        </div>
+        <div class="macro-grid">
+          <div v-for="item in macroItems" :key="item.label">
+            <span>{{ item.label }}</span>
+            <strong>{{ item.value }}</strong>
+          </div>
         </div>
       </div>
-      <ul class="advice-list">
+      <ul v-if="analysis" class="advice-list">
         <li v-for="advice in analysis.advice" :key="advice">{{ advice }}</li>
       </ul>
     </template>
@@ -39,7 +43,15 @@ const loading = ref(false)
 let pendingRequest = 0
 
 const macroItems = computed(() => {
-  if (!analysis.value) return []
+  if (!analysis.value) {
+    return [
+      { label: '热量', value: '— kcal' },
+      { label: '蛋白质', value: '— g' },
+      { label: '脂肪', value: '— g' },
+      { label: '碳水', value: '— g' },
+      { label: '钠', value: '— mg' },
+    ]
+  }
   const totals = analysis.value.totals
   return [
     { label: '热量', value: `${totals.calories} kcal` },
@@ -75,3 +87,22 @@ watch(
   { immediate: true },
 )
 </script>
+
+<style scoped>
+.macro-grid-wrapper {
+  position: relative;
+}
+
+.recalculating-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(255 255 255 / 0.7);
+  border-radius: 8px;
+  z-index: 1;
+  color: #66746b;
+  font-size: 13px;
+}
+</style>
