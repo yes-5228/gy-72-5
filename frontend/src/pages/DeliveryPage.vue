@@ -58,22 +58,22 @@
                 <td>{{ item.quantity }}</td>
                 <td>￥{{ item.unit_price }}</td>
                 <td>￥{{ (item.unit_price * item.quantity).toFixed(2) }}</td>
-                <td>{{ item.calories }}</td>
+                <td>{{ Math.round(Number(item.calories)) }}</td>
                 <td>{{ formatDecimal(item.protein) }}</td>
                 <td>{{ formatDecimal(item.fat) }}</td>
                 <td>{{ formatDecimal(item.carbohydrate) }}</td>
-                <td>{{ item.sodium }}</td>
+                <td>{{ Math.round(Number(item.sodium)) }}</td>
               </tr>
             </tbody>
             <tfoot>
               <tr>
                 <td colspan="3">合计</td>
                 <td>￥{{ task.order_detail.total_amount }}</td>
-                <td>{{ sumField(task.order_detail.items, 'calories') }}</td>
+                <td>{{ Math.round(sumField(task.order_detail.items, 'calories')) }}</td>
                 <td>{{ formatDecimal(sumField(task.order_detail.items, 'protein')) }}</td>
                 <td>{{ formatDecimal(sumField(task.order_detail.items, 'fat')) }}</td>
                 <td>{{ formatDecimal(sumField(task.order_detail.items, 'carbohydrate')) }}</td>
-                <td>{{ sumField(task.order_detail.items, 'sodium') }}</td>
+                <td>{{ Math.round(sumField(task.order_detail.items, 'sodium')) }}</td>
               </tr>
             </tfoot>
           </table>

@@ -20,7 +20,8 @@
           </div>
         </div>
       </div>
-      <ul v-if="analysis" class="advice-list">
+      <p v-if="stale" class="stale-notice">当前数据可能不是最新的</p>
+      <ul v-if="analysis && !stale" class="advice-list">
         <li v-for="advice in analysis.advice" :key="advice">{{ advice }}</li>
       </ul>
     </template>
@@ -40,6 +41,7 @@ const props = defineProps({
 
 const analysis = ref(null)
 const loading = ref(false)
+const stale = ref(false)
 let pendingRequest = 0
 
 const macroItems = computed(() => {
@@ -65,6 +67,7 @@ const macroItems = computed(() => {
 async function runAnalysis() {
   if (props.items.length === 0) {
     analysis.value = null
+    stale.value = false
     return
   }
   const requestId = ++pendingRequest
@@ -73,6 +76,11 @@ async function runAnalysis() {
     const result = await analyzeNutrition(props.items)
     if (requestId === pendingRequest) {
       analysis.value = result
+      stale.value = false
+    }
+  } catch (error) {
+    if (requestId === pendingRequest && analysis.value) {
+      stale.value = true
     }
   } finally {
     if (requestId === pendingRequest) {
@@ -103,6 +111,15 @@ watch(
   border-radius: 8px;
   z-index: 1;
   color: #66746b;
+  font-size: 13px;
+}
+
+.stale-notice {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff4e5;
+  color: #9a5b00;
   font-size: 13px;
 }
 </style>
