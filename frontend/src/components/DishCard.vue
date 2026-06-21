@@ -14,7 +14,7 @@
       <p class="dish-desc">{{ dish.description }}</p>
       <div class="nutrition-row">
         <span>{{ dish.calories }} kcal</span>
-        <span>蛋白 {{ dish.protein }}g</span>
+        <span>蛋白 {{ Number(dish.protein).toFixed(1) }}g</span>
         <span>钠 {{ dish.sodium }}mg</span>
       </div>
       <div class="dish-footer">

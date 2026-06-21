@@ -52,13 +52,13 @@ const macroItems = computed(() => {
       { label: '钠', value: '— mg' },
     ]
   }
-  const totals = analysis.value.totals
+  const t = analysis.value.totals
   return [
-    { label: '热量', value: `${totals.calories} kcal` },
-    { label: '蛋白质', value: `${totals.protein} g` },
-    { label: '脂肪', value: `${totals.fat} g` },
-    { label: '碳水', value: `${totals.carbohydrate} g` },
-    { label: '钠', value: `${totals.sodium} mg` },
+    { label: '热量', value: `${Math.round(t.calories)} kcal` },
+    { label: '蛋白质', value: `${Number(t.protein).toFixed(1)} g` },
+    { label: '脂肪', value: `${Number(t.fat).toFixed(1)} g` },
+    { label: '碳水', value: `${Number(t.carbohydrate).toFixed(1)} g` },
+    { label: '钠', value: `${Math.round(t.sodium)} mg` },
   ]
 })
 

@@ -144,9 +144,8 @@ function formatTime(value) {
 }
 
 function formatDecimal(value) {
-  if (value === null || value === undefined || value === '') return '0'
-  const num = Number(value)
-  return Number.isInteger(num) ? num.toString() : num.toFixed(1)
+  if (value === null || value === undefined || value === '') return '0.0'
+  return Number(value).toFixed(1)
 }
 
 function sumField(items, field) {
